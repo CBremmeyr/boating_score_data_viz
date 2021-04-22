@@ -4,6 +4,7 @@
 # Date: 21 April 2021
 #
 # CIS 320 Final Project: Best time for boating on lake Michigan
+# Generate line graphs for each of the four weather measurments
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -142,3 +143,49 @@ time_line_plot(time_data, air_temp_data, "Air Temperature", "Date", "Temperature
 # Plot water temperature data
 time_line_plot(time_data, water_temp_data, "Water Temperature", "Date", "Temperature (°C)")
 
+#
+# Generate score based on user set weights
+#
+
+# User set weights
+# Bigger numbers indecate that the consideration of that metric is more important
+# positive values if the value is perfered to be higher, negative if values are perfered to be smaller
+# My personal values for dinghie sailboating
+user_weights = [
+        0.80,   # Wind speed
+       -0.65,   # Wave height
+        0.75,   # Air temp
+        0.70,   # Water temp
+        ]
+
+def scale(val, src, dst):
+    return ((val - src[0]) / (src[1]-src[0])) * (dst[1]-dst[0]) + dst[0]
+
+def scale_to_0_100(orig):
+    orig_range = (min(orig), max(orig))
+    scaled_list = []
+    for i in orig:
+        scaled_list.append(scale(i, orig_range, (0, 100)))
+    return scaled_list
+
+# Scale weather data values to range of 0 to 100
+scaled_wind_speed  = scale_to_0_100(wind_speed_data)
+scaled_wave_height = scale_to_0_100(wave_height_data)
+scaled_air_temp    = scale_to_0_100(air_temp_data)
+scaled_water_temp  = scale_to_0_100(water_temp_data)
+
+# MAC weights and weather data
+boating_score = []
+for i in range(len(scaled_wind_speed)):
+    mac = 0
+    mac += user_weights[0] * scaled_wind_speed[i]
+    mac += user_weights[1] * scaled_wave_height[i]
+    mac += user_weights[2] * scaled_air_temp[i]
+    mac += user_weights[3] * scaled_water_temp[i]
+    boating_score.append(mac)
+
+# Plot boating score on line graph
+time_line_plot(time_data, boating_score, "Boating Score", "Date", "Score")
+
+#time_line_plot(time_data, water_temp_data, "Water Temperature", "Date", "Temperature (°C)")
+#def time_line_plot(time, y_data, title, x_label, y_label):
